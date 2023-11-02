@@ -13,7 +13,9 @@ using Content.Shared.Preferences;
 using Content.Shared.Roles;
 using Content.Shared.Roles.Jobs;
 using JetBrains.Annotations;
+using Microsoft.CodeAnalysis.Completion;
 using Robust.Server.Player;
+using Robust.Shared;
 using Robust.Shared.Map;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
@@ -114,6 +116,7 @@ namespace Content.Server.GameTicking
 
             if (jobId != null && !_playTimeTrackings.IsAllowed(player, jobId))
                 return;
+
             SpawnPlayer(player, character, station, jobId, lateJoin, silent);
         }
 
@@ -122,6 +125,7 @@ namespace Content.Server.GameTicking
             // Can't spawn players with a dummy ticker!
             if (DummyTicker)
                 return;
+
 
             if (station == EntityUid.Invalid)
             {
@@ -191,6 +195,15 @@ namespace Content.Server.GameTicking
             _roles.MindAddRole(newMind, job, silent: silent);
             var jobName = _jobs.MindTryGetJobName(newMind);
 
+            var allowedspecies = jobPrototype.AllowedSpecies;
+            if (_cfg.GetCVar(CVars.EnforceHumanAuthority))
+            {
+                if (!allowedspecies.Contains(character.Species))
+                {
+                    character = ReplaceSpeciesByHuman(player, character, jobPrototype);
+                }
+            }
+
             _playTimeTrackings.PlayerRolesChanged(player);
 
             var mobMaybe = _stationSpawning.SpawnPlayerCharacterOnStation(station, job, character);
@@ -256,6 +269,15 @@ namespace Content.Server.GameTicking
             PlayersJoinedRoundNormally++;
             var aev = new PlayerSpawnCompleteEvent(mob, player, jobId, lateJoin, PlayersJoinedRoundNormally, station, character);
             RaiseLocalEvent(mob, aev, true);
+        }
+
+        private HumanoidCharacterProfile ReplaceSpeciesByHuman(IPlayerSession player, HumanoidCharacterProfile character, JobPrototype jobPrototype)
+        {
+            character = HumanoidCharacterProfile.RandomWithSpecies();
+
+            _chatManager.DispatchServerMessage(player, ("You cannot play this role with your current species. Your character has been randomized and turned into human."));
+
+            return character;
         }
 
         public void Respawn(IPlayerSession player)

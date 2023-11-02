@@ -1,4 +1,5 @@
 using Content.Shared.Access;
+using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Players.PlayTimeTracking;
 using Content.Shared.StatusIcon;
 using Robust.Shared.Prototypes;
@@ -86,6 +87,9 @@ namespace Content.Shared.Roles
 
         [DataField("special", serverOnly: true)]
         public JobSpecial[] Special { get; private set; } = Array.Empty<JobSpecial>();
+
+        [DataField("allowedSpecies", customTypeSerializer: typeof(PrototypeIdListSerializer<SpeciesPrototype>))]
+        public IReadOnlyCollection<string> AllowedSpecies { get; private set; } = Array.Empty<string>();
 
         [DataField("access", customTypeSerializer: typeof(PrototypeIdListSerializer<AccessLevelPrototype>))]
         public IReadOnlyCollection<string> Access { get; private set; } = Array.Empty<string>();
