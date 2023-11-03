@@ -133,6 +133,12 @@ namespace Content.Shared.CCVar
             GameDummyTicker = CVarDef.Create("game.dummyticker", false, CVar.ARCHIVE | CVar.SERVERONLY);
 
         /// <summary>
+        /// Forbids players to join command staff as non-human species.
+        /// </summary>
+        public static readonly CVarDef<bool>
+            EnforceHumanAuthority = CVarDef.Create("player.enforce_human_authority", false, CVar.SERVERONLY);
+
+        /// <summary>
         ///     Controls if the lobby is enabled. If it is not, and there are no available jobs, you may get stuck on a black screen.
         /// </summary>
         public static readonly CVarDef<bool>
